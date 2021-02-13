@@ -115,7 +115,7 @@ struct node* createNode() {
 	newNode->rightChild = NULL;
 	newNode->parent = NULL;
 	newNode->neighborNode = NULL;
-	return;
+	return newNode;
 }
 
 struct node *findLeaf(int key, struct node* curr) {
@@ -225,6 +225,7 @@ int childHasNeighbor(struct node* curr) {
 void attachChildsNeighborBecomeChild(struct node *curr) {
 	if (hasOneValue(curr)) {
 			curr->rightChild = curr->leftChild->neighborNode;
+			curr->leftChild->neighborNode = NULL;
 	} else if (hasTwoValue(curr)) {
 		if (curr->leftChild->neighborNode != NULL) {
 			curr->midChild = curr->leftChild->neighborNode;
