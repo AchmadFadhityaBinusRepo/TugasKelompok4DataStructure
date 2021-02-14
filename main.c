@@ -28,6 +28,7 @@ void doBalancingAfterInsert(struct node * curr);
 void doInsertion();
 void inorderTraversal(struct node *treeNode);
 void menu();
+void doDeletion();
 // --------- End of Interfaces ---------------
 
 int main(int argc, char *argv[]) {
@@ -44,6 +45,7 @@ int main(int argc, char *argv[]) {
 					doInsertion();
 			break;
 			case 2:
+					doDeletion();
 				// case2:
 				// 	printf("Masukkan angka : ");
 				// 	scanf("%d", &angka);
@@ -93,6 +95,137 @@ int hasOneValue(struct node *treeNode) {
 		return 1;
 	} 
 	return 0;
+}
+
+void doDeletion() {
+	int value;
+	printf("\nType value that will be delete from the tree: ");
+	scanf("%d", &value);
+	
+	struct node *searchedNode = findNode(value, root);
+	if (searchedNode == NULL) {
+		printf("Node not found");
+		return;
+	}
+	if (hasChild(searchedNode)) {
+		searchedNode = swapTillReachLeafInorder(searchedNode);
+	}
+	delete(value, searchedNode);
+	if (searchedNode->leftVal == NULL) {
+		doCalibrationAfterDelete(searchedNode);
+	}
+}
+
+int ableToDoRedistribution(struct node* curr) {
+	struct node * parent = curr->parent;
+	if (parent->leftChild != NULL && parent->leftChild->rightVal != NULL) {
+		return 1;
+	} else if (parent->midChild != NULL && parent->midChild->rightVal != NULL) {
+		return 1;
+	} else if (parent->rightChild != NULL && parent->rightChild->rightVal != NULL) {
+		return 1;
+	}
+	return 0;
+}
+
+void doRedistribution(struct node* curr) {
+	struct node * parent = curr->parent;
+	if (parent->leftChild != NULL && parent->leftChild->rightVal != NULL) {
+		curr->leftVal = parent->leftChild->rightVal;
+		parent->leftChild->rightVal = NULL;
+	} else if (parent->midChild != NULL && parent->midChild->rightVal != NULL) {
+		curr->leftVal = parent->midChild->rightVal;
+		parent->midChild->rightVal = NULL;
+	} else if (parent->rightChild != NULL && parent->rightChild->rightVal != NULL) {
+		curr->leftVal = parent->rightChild->rightVal;
+		parent->rightChild->rightVal = NULL;
+	}
+}
+
+void doMerging(struct node* curr) {
+	// --- still confused ----
+	// if (curr->leftVal != NULL) {
+	// 	return;
+	// }
+	// struct node* parent = curr->parent;
+	// parent->leftChild->rightVal = parent->leftVal;
+
+	// if (parent->midChild)
+
+	// if (hasChild(curr)) {
+	// 	parent-leftChild->
+	// }
+}
+
+void doCalibrationAfterDelete(struct node *curr) {
+	if (ableToDoRedistribution(curr)) {
+		doRedistribution(curr);
+	} else {
+		doMerging(curr);
+	}
+}
+
+int hasChild(struct node *curr) {
+	if (curr->leftChild != NULL && curr->midChild != NULL && curr->rightChild != NULL) {
+		return 1;
+	}
+	return 0;
+}
+
+struct node* swapTillReachLeafInorder(int value, struct node* curr) {
+	struct node * newNode;
+	if (hasTwoValue(curr) && (value == curr->leftVal)) {
+		int temp = curr->leftVal;
+		curr->leftVal = curr->midChild->leftVal;
+		curr->midChild->leftVal = temp;
+		newNode = curr->midChild;
+	} else {
+		int temp = curr->rightVal;
+		curr->rightVal = curr->rightChild->leftVal;
+		curr->rightChild->leftVal = temp;
+		newNode = curr->rightChild;
+	}
+
+	if (hasChild(newNode)) {
+		newNode = swapTillReachLeafInorder(value, newNode);
+	} 
+
+	return newNode;
+}
+
+void delete(int value, struct node * curr) {
+	if (hasTwoValue(curr)) {
+		if (value == curr->leftVal) {
+			curr->leftVal = curr->rightVal;
+		}
+		curr->rightVal = NULL;
+	} else {
+		curr->leftVal = NULL;
+	}
+}
+
+struct node* findNode(int value, struct node* curr) {
+	if (curr == NULL) {
+		return NULL;
+	}
+	if (value == curr->leftVal || value == curr->rightVal) {
+		return curr;
+	}
+	if (hasOneValue(curr)) {
+		if (value < curr->leftVal) {
+			return findNode(value, curr->leftChild);
+		} else {
+			return findNode(value, curr->rightChild);
+		}
+	} else {
+		if (value < curr->leftVal) {
+			return findNode(value, curr->leftChild);
+		} else if (value > curr->rightVal) {
+			return findNode(value, curr->rightChild);
+		} else {
+			return findNode(value, curr->midChild);
+		}
+	}
 }
 
 void doInsertion() {
@@ -267,13 +400,6 @@ void attachChildToEachNode(struct node *curr, struct node *newNode) {
 		curr->rightChild = curr->midChild;
 	}
 	curr->midChild = NULL;
-}
-
-int hasChild(struct node *curr) {
-	if (curr->leftChild != NULL && curr->midChild != NULL && curr->rightChild != NULL) {
-		return 1;
-	}
-	return 0;
 }
 
 void raiseMidValueToParent(struct node *curr) {
