@@ -19,6 +19,8 @@ int search(int key);
 int hasChild(struct node *curr);
 struct node* createNode();
 struct node *findLeaf(int key, struct node* curr);
+struct node* swapTillReachLeafInorder(int value, struct node* curr);
+struct node* findNode(int value, struct node* curr);
 void insert(int key, struct node* curr);
 void raiseMidValueToParent(struct node *curr);
 void separateNode(struct node *curr);
@@ -41,16 +43,10 @@ int main(int argc, char *argv[]) {
 		printf("\n\n");
 		switch(pilihan){
 			case 1:
-				case1:
-					doInsertion();
+				doInsertion();
 			break;
 			case 2:
-					doDeletion();
-				// case2:
-				// 	printf("Masukkan angka : ");
-				// 	scanf("%d", &angka);
-				// 	fflush(stdin);
-				// 	searchDelete(angka, root);
+				doDeletion();
 			break;
 			case 3:
 			break;
@@ -66,19 +62,20 @@ void menu() {
 }
 
 void inorderTraversal(struct node *treeNode) {
+	printf("Inorder Traversal  ", treeNode->leftVal);
 	if (treeNode == NULL) {
 		return;
 	}
 	if (hasTwoValue(treeNode)) {
 		inorderTraversal(treeNode->leftChild);
-		printf("l-two-%d  ", treeNode->leftVal);
+		printf("%d  ", treeNode->leftVal);
 		inorderTraversal(treeNode->midChild);
-		printf("r-two-%d  ", treeNode->rightVal);
+		printf("%d  ", treeNode->rightVal);
 		inorderTraversal(treeNode->rightChild);
 	}
 	if (hasOneValue(treeNode)) {
 		inorderTraversal(treeNode->leftChild);
-		printf("l-One-%d  ", treeNode->leftVal);
+		printf("%d  ", treeNode->leftVal);
 		inorderTraversal(treeNode->rightChild);
 	}
 }
@@ -108,7 +105,7 @@ void doDeletion() {
 		return;
 	}
 	if (hasChild(searchedNode)) {
-		searchedNode = swapTillReachLeafInorder(searchedNode);
+		searchedNode = swapTillReachLeafInorder(value, searchedNode);
 	}
 	delete(value, searchedNode);
 	if (searchedNode->leftVal == NULL) {
